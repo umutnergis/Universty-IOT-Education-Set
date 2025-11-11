@@ -18,6 +18,17 @@ Bu depo, ESP32 tabanlı sensör/aktüatör haberleşmesi ile çalışan modüler
 - [deneme2.py](deneme2.py) — API çağrı örneği / yardımcı script
 - [Project PCB/](Project%20PCB/) — Donanım / PCB dokümanları ve çizimler
 
+## Project PCB — Görseller
+Aşağıda Project PCB klasörüne yüklediğiniz iki görsel doğrudan gösterilmektedir. Dosya isimleri depo içerisindeki adlara göre değişiyorsa, bağlantıları düzenleyin.
+
+![PCB - Top View](Project%20PCB/pcb_top.png)
+![PCB - Schematic](Project%20PCB/pcb_schematic.png)
+
+Dosya bağlantıları:
+- [Project PCB/pcb_top.png](Project%20PCB/pcb_top.png)
+- [Project PCB/pcb_schematic.png](Project%20PCB/pcb_schematic.png)
+- Klasör: [Project PCB/](Project%20PCB/)
+
 ## Modüller — Özet
 - Modül 1 (Power): wc_id=1 — akım/güç verileri → endpoint: `energy` ([config.py](config.py))
 - Modül 2 (Color): wc_id=2 — kamera tabanlı renk algılama ve sayaç → endpoint: `prodEvent` ([module_color.py](module_color.py))
