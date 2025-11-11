@@ -21,7 +21,7 @@ Bu depo, ESP32 tabanlı sensör/aktüatör haberleşmesi ile çalışan modüler
 ## Project PCB — Görseller
 Aşağıda Project PCB klasörüne yüklediğiniz iki görsel doğrudan gösterilmektedir. Dosya isimleri depo içerisindeki adlara göre değişiyorsa, bağlantıları düzenleyin.
 
-![PCB - Top View]([Project%20PCB/pcb_top.png](https://github.com/umutnergis/Universty-IOT-Education-Set/blob/main/Project%20PCB/esp32-stm32-pcb.png))
+![PCB - Top View](https://github.com/umutnergis/Universty-IOT-Education-Set/blob/main/Project%20PCB/esp32-stm32-pcb.png)
 ![PCB - Schematic](Project%20PCB/pcb_schematic.png)
 
 Dosya bağlantıları:
