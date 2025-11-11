@@ -1,250 +1,77 @@
-# Endüstriyel Eğitim Sistemi - Modüler Mimari
+# Endüstriyel Eğitim Sistemi - Modüler Mimari 
 
-## 📁 Proje Yapısı
+Bu depo, ESP32 tabanlı sensör/aktüatör haberleşmesi ile çalışan modüler bir eğitim sistemi içerir. Her modül bağımsız çalışır ve ilgili API endpoint'lerine veri gönderir.
 
-```
-deneme/
-├── config.py              # Ortak ayarlar ve konfigürasyon
-├── esp32_comm.py          # ESP32 serial haberleşme
-├── nfc_reader.py          # NFC kart okuyucu
-├── module_power.py        # Modül 1: Akım & Güç (wc_id=1)
-├── module_color.py        # Modül 2: Renk Algılama (wc_id=2)
-├── module_fault.py        # Modül 3: Arıza Tespit (wc_id=3)
-├── module_weight.py       # Modül 4: Ağırlık Ölçüm (wc_id=4)
-├── module_conveyor.py     # Modül 5: Konveyör (wc_id=5)
-├── main_gui.py            # Ana GUI yöneticisi
-├── gui_modules.py         # GUI modül ekranları (main_gui.py'ye eklenecek)
-└── README.md              # Bu dosya
-```
+## Proje Dosyaları (kısa açıklama + link)
+- [config.py](config.py) — Ortak ayarlar ve API endpoint'leri (örn. [`API_ENDPOINTS`](config.py))
+- [esp32_comm.py](esp32_comm.py) — UART üzerinden ESP32 iletişimi ve callback sistemi (sınıf: [`ESP32Communication`](esp32_comm.py))
+- [nfc_reader.py](nfc_reader.py) — PN532 NFC okuma döngüsü ve callback (sınıf: [`NFCReader`](nfc_reader.py))
+- [main_gui.py](main_gui.py) — Tkinter GUI ve modül yönetimi (sınıf: [`MainGUI`](main_gui.py))
+- [module_power.py](module_power.py) — Akım & güç ölçümü modülü (PowerModule)
+- [module_production.py](module_production.py) — Enerji üretimi modülü (ProductionModule)
+- [module_color.py](module_color.py) — Renk algılama ve ürün sayma (ColorModule)
+- [module_fault.py](module_fault.py) — Arıza tespit modülü (FaultModule)
+- [module_weight.py](module_weight.py) — Ağırlık ölçüm modülü, sabit ölçüm sayısı (WeightModule)
+- [module_conveyor.py](module_conveyor.py) — Konveyör sayacı / hız (ConveyorModule)
+- [module_ocr.py](module_ocr.py) — Manuel OCR modülü, Tesseract tabanlı (OCRModule)
+- [module_metal.py](module_metal.py) — Metal algılama modülü (MetalModule)
+- [deneme2.py](deneme2.py) — API çağrı örneği / yardımcı script
+- [Project PCB/](Project%20PCB/) — Donanım / PCB dokümanları ve çizimler
 
-## 🎯 Modül Yapısı
+## Modüller — Özet
+- Modül 1 (Power): wc_id=1 — akım/güç verileri → endpoint: `energy` ([config.py](config.py))
+- Modül 2 (Color): wc_id=2 — kamera tabanlı renk algılama ve sayaç → endpoint: `prodEvent` ([module_color.py](module_color.py))
+- Modül 3 (Fault): wc_id=3 — Fire/Voice/Vibration algılama → endpoint: `faultEvent` ([module_fault.py](module_fault.py))
+- Modül 4 (Weight): wc_id=4 — hassas tartım, ölçüm toplama → endpoint: `weightEvent` ([module_weight.py](module_weight.py))
+- Modül 5 (Conveyor): wc_id=5 — konveyör sayaç & hız → endpoint: `conveyorEvent` ([module_conveyor.py](module_conveyor.py))
+- OCR: Manuel, session gerektirmez — [`OCRModule`](module_ocr.py)
 
-Her modül **bağımsız** çalışır ve **farklı API endpoint**'lerine veri gönderir:
+(Detaylı davranış için ilgili modül dosyalarına bakın: örn. [`WeightModule`](module_weight.py), [`ColorModule`](module_color.py), [`ConveyorModule`](module_conveyor.py))
 
-### Modül 1: Akım & Güç Ölçümü
-- **wc_id:** 1
-- **ESP32 Mesajları:** `cur=X.XX`, `pow=X.XX`
-- **API Endpoint:** `/api/v1/energy`
-- **Veri Formatı:**
-```json
-{
-  "wc_id": 1,
-  "voltage_v": 24,
-  "current_a": 0.16,
-  "power_w": 12.5
-}
-```
+## Kurulum (kısa)
+1. Sistem paketleri:
+   sudo apt-get update
+   sudo apt-get install python3-pip python3-pil python3-pil.imagetk
+2. Python paketleri:
+   pip3 install --upgrade pip
+   pip3 install pyserial RPi.GPIO requests pillow
+   pip3 install opencv-python-headless numpy   # Kamera için
+   pip3 install adafruit-circuitpython-pn532   # NFC için (opsiyonel)
+3. UART:
+   sudo raspi-config → Interface Options → Serial Port → Login shell: NO, Serial hardware: YES → reboot
 
-### Modül 2: Renk Algılama
-- **wc_id:** 2
-- **ESP32 Mesajları:** `Count`
-- **API Endpoint:** `/api/v1/prodEvent`
-- **Veri Formatı:**
-```json
-{
-  "sessionId": 123,
-  "wc_id": 2,
-  "eventType": "product_detected",
-  "color": "Kırmızı",
-  "count": 5
-}
-```
+## Çalıştırma
+- Ana GUI: python3 main_gui.py
+  - GUI entry: [`MainGUI`](main_gui.py)
+- Modül testleri (tek tek):
+  - python3 module_power.py
+  - python3 module_color.py
+  - python3 module_fault.py
+  - python3 module_weight.py
+  - python3 module_conveyor.py
+  - python3 esp32_comm.py
+  - python3 nfc_reader.py
 
-### Modül 3: Arıza Tespit
-- **wc_id:** 3
-- **ESP32 Mesajları:** `Fire`, `Voice`, `Vibration`
-- **API Endpoint:** `/api/v1/faultEvent`
-- **Veri Formatı:**
-```json
-{
-  "sessionId": 123,
-  "wc_id": 3,
-  "faultType": "fire",
-  "severity": "critical",
-  "timestamp": "2025-01-15T10:30:00",
-  "status": "active"
-}
-```
+## Önemli Notlar / Davranışlar
+- NFC ile session yönetimi: GUI içindeki [`MainGUI.start_session`](main_gui.py) akışı kullanılır. NFC okuma: [`NFCReader`](nfc_reader.py).
+- OCR modülü manueldir: sadece "OKU" tetiklenince çalışır; Tesseract gerekli ([module_ocr.py](module_ocr.py)).
+- Weight modülü: sabit sayıda ölçüm toplar (default 8) → ortalama gönderilir ([module_weight.py](module_weight.py)).
+- ESP32 ↔ Pi protokolü: `start`, `stop`, `test` (Pi→ESP32) ve `cur=...`, `pow=...`, `weight=...`, `Count`, `Fire`, `Voice`, `Vibration` (ESP32→Pi) — uygulama içinde parse ve callback'ler [esp32_comm.py](esp32_comm.py) tarafından işlenir.
 
-### Modül 4: Ağırlık Ölçüm
-- **wc_id:** 4
-- **ESP32 Mesajları:** `weight=X.XX`
-- **API Endpoint:** `/api/v1/weightEvent`
-- **Veri Formatı:**
-```json
-{
-  "sessionId": 123,
-  "wc_id": 4,
-  "weight_g": 125.5,
-  "timestamp": "2025-01-15T10:30:00",
-  "tare_g": 0.0
-}
-```
+## API & Konfigürasyon
+- API ana url'leri ve anahtar: [config.py](config.py) (`API_BASE_URL`, `API_KEY`, `API_ENDPOINTS`)
+- Tüm modüller config'deki endpoint'leri kullanır (örnek: `API_ENDPOINTS['product']`, `API_ENDPOINTS['weight']`)
 
-### Modül 5: Konveyör
-- **wc_id:** 5
-- **ESP32 Mesajları:** `Count`
-- **API Endpoint:** `/api/v1/conveyorEvent`
-- **Veri Formatı:**
-```json
-{
-  "sessionId": 123,
-  "wc_id": 5,
-  "itemCount": 50,
-  "runtime_seconds": 120.5,
-  "rate_per_minute": 24.8,
-  "timestamp": "2025-01-15T10:30:00"
-}
-```
+## Hata Ayıklama / Test İpuçları
+1. Logları kontrol edin (her dosyada logging kullanılıyor).
+2. Modülleri tek tek başlatıp test edin (ör. python3 module_color.py).
+3. ESP32 seri iletişimini test edin: python3 esp32_comm.py.
+4. NFC çalışmıyorsa PN532 kurulumu ve paketleri kontrol edin.
 
-## 🚀 Kurulum
+## Katkı / Geliştirme
+- Kod düzeni: modüller bağımsızdır ve GUI tarafından callback ile güncellenir — GUI: [`main_gui.py`](main_gui.py).
+- Yeni modül eklemek için mevcut modül örneklerini takip edin ve `MainGUI.modules` sözlüğüne ekleyin.
 
-### 1. Gerekli Kütüphaneler
+---
 
-```bash
-sudo apt-get update
-sudo apt-get install python3-pip python3-pil python3-pil.imagetk
-
-pip3 install --upgrade pip
-pip3 install pyserial RPi.GPIO requests pillow
-
-# NFC için (opsiyonel)
-pip3 install adafruit-circuitpython-pn532
-
-# Kamera için (opsiyonel)
-pip3 install opencv-python-headless numpy
-```
-
-### 2. UART Etkinleştirme
-
-```bash
-sudo raspi-config
-# Interface Options -> Serial Port
-# Login shell: NO
-# Serial port hardware: YES
-
-sudo reboot
-```
-
-## 📝 main_gui.py Güncelleme
-
-`gui_modules.py` dosyasındaki fonksiyonları `main_gui.py` içindeki `MainGUI` sınıfına ekleyin:
-
-```python
-# main_gui.py dosyasının sonuna ekleyin:
-
-# gui_modules.py'deki tüm show_* fonksiyonlarını buraya kopyalayın
-```
-
-## ▶️ Çalıştırma
-
-```bash
-cd /home/pi/Desktop/deneme
-python3 main_gui.py
-```
-
-## 🎮 Kullanım
-
-### Adım 1: NFC Kart Okutma
-- Herhangi bir modülü başlatmadan önce NFC kartınızı okutun
-- Kart okunduğunda buzzer 2 kez bip sesi çıkarır
-- Session otomatik başlar
-
-### Adım 2: Modül Seçimi
-- Sol menüden istediğiniz modülü seçin
-- Her modül bağımsız çalışır
-
-### Adım 3: Başlatma
-- Ekrandaki **▶ BAŞLAT** butonuna veya
-- Fiziksel **START** butonuna basın
-- ESP32'ye `start` komutu gönderilir
-- Modül çalışmaya başlar
-
-### Adım 4: Veri İzleme
-- Her modül kendi verisini gösterir
-- Veriler otomatik olarak ilgili API'ye gönderilir
-- Her API çağrısı loglanır
-
-### Adım 5: Durdurma
-- **⏹ DURDUR** butonuna veya
-- Fiziksel **STOP** butonuna basın
-- ESP32'ye `stop` komutu gönderilir
-
-## 🔧 ESP32 Protokolü
-
-### Raspberry Pi → ESP32
-```
-start       # Motor başlat
-stop        # Motor durdur
-test        # Test komutu
-```
-
-### ESP32 → Raspberry Pi
-```
-cur=0.16         # Akım verisi (Amper)
-pow=12.5         # Güç verisi (Watt)
-weight=125.5     # Ağırlık verisi (gram)
-Count            # Ürün geçişi
-Fire             # Yangın algılandı
-Voice            # Ses algılandı
-Vibration        # Titreşim algılandı
-```
-
-## 🐛 Test Etme
-
-Her modülü ayrı ayrı test edebilirsiniz:
-
-```bash
-# Güç modülü test
-python3 module_power.py
-
-# Renk modülü test
-python3 module_color.py
-
-# Arıza modülü test
-python3 module_fault.py
-
-# Ağırlık modülü test
-python3 module_weight.py
-
-# Konveyör modülü test
-python3 module_conveyor.py
-
-# ESP32 haberleşme test
-python3 esp32_comm.py
-
-# NFC okuyucu test
-python3 nfc_reader.py
-```
-
-## 📊 API Endpoint Özeti
-
-| Modül | wc_id | Endpoint | Açıklama |
-|-------|-------|----------|----------|
-| Güç | 1 | /api/v1/energy | Akım ve güç verileri |
-| Renk | 2 | /api/v1/prodEvent | Ürün sayım verileri |
-| Arıza | 3 | /api/v1/faultEvent | Arıza bildirimleri |
-| Ağırlık | 4 | /api/v1/weightEvent | Ağırlık ölçümleri |
-| Konveyör | 5 | /api/v1/conveyorEvent | Konveyör verileri |
-
-## 🔑 Özellikler
-
-✅ **Modüler Yapı:** Her modül bağımsız çalışır
-✅ **Farklı API'ler:** Her modül kendi endpoint'ine gönderir
-✅ **Farklı wc_id'ler:** Her istasyon benzersiz ID'ye sahip
-✅ **Test Edilebilir:** Her modül ayrı test edilebilir
-✅ **Callback Sistemi:** GUI ile modüller arasında esnek iletişim
-✅ **Thread-Safe:** Çoklu thread desteği
-✅ **Hata Yönetimi:** Kapsamlı loglama ve hata yakalama
-
-## 📞 Destek
-
-Herhangi bir sorun için:
-1. Log dosyalarını kontrol edin
-2. Her modülü ayrı ayrı test edin
-3. ESP32 bağlantısını kontrol edin
-4. API erişimini test edin
-
-## 🎓 Gaziantep Üniversitesi
-Mühendislik Fakültesi
-Endüstriyel Eğitim Sistemi
+Daha fazla bilgi için ilgili dosyalara bakınız: [main_gui.py](main_gui.py), [module_ocr.py](module_ocr.py), [module_weight.py](module_weight.py), [module_color.py](module_color.py), [module_conveyor.py](module_conveyor.py), [module_fault.py](module_fault.py), [module_production.py](module_production.py), [module_metal.py](module_metal.py), [esp32_comm.py](esp32_comm.py), [nfc_reader.py](nfc_reader.py), [deneme2.py](deneme2.py), [config.py](config.py), [Project PCB/](Project%20PCB/)
