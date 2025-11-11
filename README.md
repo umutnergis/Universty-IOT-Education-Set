@@ -25,8 +25,8 @@ Aşağıda Project PCB klasörüne yüklediğiniz iki görsel doğrudan gösteri
 ![PCB - Schematic](https://github.com/umutnergis/Universty-IOT-Education-Set/blob/main/Project%20PCB/rpi_pcb.png)
 
 Dosya bağlantıları:
-- [Project PCB/pcb_top.png](Project%20PCB/pcb_top.png)
-- [Project PCB/pcb_schematic.png](Project%20PCB/pcb_schematic.png)
+- [Project PCB/pcb_stm32.png](Project%20PCB/pcb_top.png)
+- [Project PCB/pcb_rpi.png](Project%20PCB/pcb_schematic.png)
 - Klasör: [Project PCB/](Project%20PCB/)
 
 ## Modüller — Özet
